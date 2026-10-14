@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold mb-1">Operational Dashboard</h3>
+    <p class="text-muted small mb-0">Live operations, billing summaries, and TQM performance indicators</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('orders.create') }}" class="btn btn-emerald">
+      <i class="bi bi-cart-plus me-1"></i>Create Order
+    </a>
+    <a href="{{ url_for('quality.index') }}" class="btn btn-outline-emerald">
+      <i class="bi bi-pie-chart me-1"></i>TQM Quality Hub
+    </a>
+  </div>
+</div>
+
+<!-- 4 Key Metric Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon emerald">
+        <i class="bi bi-cash-stack"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ currency_symbol }}{{ "%.2f"|format(today_sales) }}</div>
+        <div class="stat-label">Sales Today</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon blue">
+        <i class="bi bi-receipt"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ today_invoices }}</div>
+        <div class="stat-label">Bills Finalized Today</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon amber">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ pending_orders }}</div>
+        <div class="stat-label">Active Open Orders</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon purple">
+        <i class="bi bi-menu-button-wide"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ total_menu }}</div>
+        <div class="stat-label">Available Menu Dishes</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions Toolbar -->
+<div class="card-custom mb-4">
+  <div class="card-custom-body py-3">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <span class="text-secondary small fw-bold me-2"><i class="bi bi-lightning-charge me-1"></i>Quick Actions:</span>
+      <a href="{{ url_for('orders.create') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-plus-lg me-1 text-success"></i>Take New Order
+      </a>
+      <a href="{{ url_for('menu.create') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-egg-fried me-1 text-primary"></i>Add Menu Item
+      </a>
+      <a href="{{ url_for('billing.history') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-file-earmark-spreadsheet me-1 text-info"></i>Search Invoices
+      </a>
+      <a href="{{ url_for('settings.index') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-gear me-1 text-warning"></i>System Settings
+      </a>
+      <a href="{{ url_for('logs.index') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-terminal me-1 text-dark"></i>Audit Logs
+      </a>
+      <a href="{{ url_for('quality.defects') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-bug me-1 text-danger"></i>Report Defect
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Interactive Chart Visualizations -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-8">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5><i class="bi bi-graph-up me-2 text-success"></i>Daily Sales Trend (Last 7 Days)</h5>
+        <span class="badge bg-light text-secondary border">Actual Invoices</span>
+      </div>
+      <div class="card-custom-body">
+        <canvas id="salesTrendChart" height="110"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5><i class="bi bi-pie-chart me-2 text-primary"></i>Top Ordered Items</h5>
+      </div>
+      <div class="card-custom-body">
+        {% if top_item_labels %}
+          <canvas id="topItemsChart" height="220"></canvas>
+        {% else %}
+          <div class="empty-state py-4">
+            <i class="bi bi-bar-chart-line fs-1"></i>
+            <p class="mb-0">No item sales recorded yet.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Invoices & Quality Alert -->
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card-custom">
+      <div class="card-custom-header">
+        <h5><i class="bi bi-clock-history me-2"></i>Recent Finalized Billing Activity</h5>
+        <a href="{{ url_for('billing.history') }}" class="btn btn-sm btn-outline-secondary">View All</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-custom align-middle">
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Customer / Table</th>
+              <th>Type</th>
+              <th>Grand Total</th>
+              <th>Date & Time</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inv in recent_invoices %}
+              <tr>
+                <td class="fw-bold text-success">{{ inv.invoice_number }}</td>
+                <td>
+                  <div class="fw-medium">{{ inv.customer_name or "Walk-in Guest" }}</div>
+                  <small class="text-muted">Table: {{ inv.table_number or "N/A" }}</small>
+                </td>
+                <td><span class="badge bg-light text-dark border">{{ inv.order_type }}</span></td>
+                <td class="fw-bold">{{ currency_symbol }}{{ "%.2f"|format(inv.grand_total) }}</td>
+                <td class="small text-muted">{{ inv.invoice_date[:19].replace('T', ' ') }}</td>
+                <td>
+                  <a href="{{ url_for('billing.view_invoice', invoice_number=inv.invoice_number) }}" class="btn btn-sm btn-outline-emerald">
+                    <i class="bi bi-printer"></i>
+                  </a>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">
+                  No invoices finalized yet today. Create an order to begin.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-custom">
+      <div class="card-custom-header">
+        <h5><i class="bi bi-shield-check me-2 text-success"></i>TQM Quality Watch</h5>
+      </div>
+      <div class="card-custom-body">
+        <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-3">
+          <div>
+            <div class="small text-muted">Unresolved Defects</div>
+            <h4 class="fw-bold mb-0 text-danger">{{ open_defects }}</h4>
+          </div>
+          <i class="bi bi-bug fs-1 text-danger opacity-75"></i>
+        </div>
+
+        <p class="small text-secondary mb-3">
+          TQM Continuous Improvement principles dictate logging, analyzing root-causes, and preventing recurring defects.
+        </p>
+
+        <div class="d-grid gap-2">
+          <a href="{{ url_for('quality.defects') }}" class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-clipboard-data me-1"></i>Open Defect Checksheet
+          </a>
+          <a href="{{ url_for('quality.pareto') }}" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-bar-chart-steps me-1"></i>View Pareto Analysis (80/20)
+          </a>
+          <a href="{{ url_for('quality.fmea') }}" class="btn btn-sm btn-outline-dark">
+            <i class="bi bi-shield-exclamation me-1"></i>Review FMEA Risk Priority
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 1. Sales Trend Line Chart
+    const trendCtx = document.getElementById("salesTrendChart");
+    if (trendCtx) {
+      new Chart(trendCtx, {
+        type: "line",
+        data: {
+          labels: {{ chart_dates|tojson }},
+          datasets: [{
+            label: "Sales ({{ currency_symbol }})",
+            data: {{ chart_sales|tojson }},
+            borderColor: "#0f766e",
+            backgroundColor: "rgba(15, 118, 110, 0.1)",
+            fill: true,
+            tension: 0.3,
+            borderWidth: 2,
+            pointBackgroundColor: "#0f766e",
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: "#e2e8f0" } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // 2. Top Items Doughnut Chart
+    const itemsCtx = document.getElementById("topItemsChart");
+    if (itemsCtx && {{ top_item_labels|length }} > 0) {
+      new Chart(itemsCtx, {
+        type: "doughnut",
+        data: {
+          labels: {{ top_item_labels|tojson }},
+          datasets: [{
+            data: {{ top_item_counts|tojson }},
+            backgroundColor: ["#0f766e", "#10b981", "#3b82f6", "#f59e0b", "#8b5cf6"]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 11 } } }
+          }
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Start New Order Ticket - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card-custom">
+      <div class="card-custom-header">
+        <h5><i class="bi bi-cart-plus text-success me-2"></i>Create New Order Ticket</h5>
+        <a href="{{ url_for('orders.index') }}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i>Back to Orders
+        </a>
+      </div>
+      <div class="card-custom-body">
+        <form method="POST">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Order Service Type <span class="text-danger">*</span></label>
+              <select name="order_type" class="form-select" id="orderTypeSelect" required>
+                <option value="Dine-in" selected>Dine-in (Table Service)</option>
+                <option value="Takeaway">Takeaway (Parcel / Counter)</option>
+              </select>
+            </div>
+
+            <div class="col-md-6" id="tableGroup">
+              <label class="form-label fw-semibold">Table Assignment</label>
+              <input type="text" name="table_number" class="form-control" placeholder="e.g. Table 4 or T-12" value="Table 1">
+              <small class="text-muted">Required for Dine-in orders.</small>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Customer Name (Optional)</label>
+              <input type="text" name="customer_name" class="form-control" placeholder="Guest name">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Contact Number (Optional)</label>
+              <input type="text" name="customer_contact" class="form-control" placeholder="+91 98765 00000">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Promotional Discount (%)</label>
+              <div class="input-group">
+                <input type="number" step="0.5" min="0" max="{{ max_discount }}" name="discount_rate" class="form-control" value="0.0">
+                <span class="input-group-text">%</span>
+              </div>
+              <small class="text-muted">Maximum allowed discount: {{ max_discount }}% (configured).</small>
+            </div>
+
+            <div class="col-12 mt-4 d-flex justify-content-end gap-2">
+              <a href="{{ url_for('orders.index') }}" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-emerald">
+                <i class="bi bi-arrow-right-circle me-1"></i>Proceed to Add Items
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const orderTypeSelect = document.getElementById("orderTypeSelect");
+  const tableGroup = document.getElementById("tableGroup");
+  if (orderTypeSelect && tableGroup) {
+    orderTypeSelect.addEventListener("change", (e) => {
+      if (e.target.value === "Takeaway") {
+        tableGroup.style.display = "none";
+      } else {
+        tableGroup.style.display = "block";
+      }
+    });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{% if is_edit %}Edit Dish{% else %}Add New Menu Item{% endif %} - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card-custom">
+      <div class="card-custom-header">
+        <h5>
+          <i class="bi {% if is_edit %}bi-pencil-square text-primary{% else %}bi-plus-circle text-success{% endif %} me-2"></i>
+          {% if is_edit %}Edit Menu Item #{{ item.id }}{% else %}Add New Menu Item{% endif %}
+        </h5>
+        <a href="{{ url_for('menu.index') }}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i>Back to Menu
+        </a>
+      </div>
+      <div class="card-custom-body">
+        <form method="POST">
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label fw-semibold">Dish Name <span class="text-danger">*</span></label>
+              <input type="text" name="name" class="form-control" placeholder="e.g. Paneer Butter Masala" value="{{ item.name if item else '' }}" required>
+              <small class="text-muted">Unique dish title served to guests.</small>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Item Code</label>
+              <input type="text" name="item_code" class="form-control" placeholder="Auto-generated if blank" value="{{ item.item_code if item else '' }}" {% if is_edit %}readonly{% endif %}>
+              <small class="text-muted">{% if is_edit %}Code cannot be altered.{% else %}Leave blank for auto-number.{% endif %}</small>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+              <input list="categoryOptions" name="category" class="form-control" placeholder="Select or type new category..." value="{{ item.category if item else '' }}" required>
+              <datalist id="categoryOptions">
+                {% for cat in categories %}
+                  <option value="{{ cat }}">
+                {% endfor %}
+                <option value="Starters">
+                <option value="Main Course">
+                <option value="Breads">
+                <option value="Rice">
+                <option value="Beverages">
+                <option value="Desserts">
+              </datalist>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Unit Price ({{ currency_symbol }}) <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text">{{ currency_symbol }}</span>
+                <input type="number" step="0.01" min="0" name="unit_price" class="form-control" placeholder="0.00" value="{{ '%.2f'|format(item.unit_price) if item else '' }}" required>
+              </div>
+              <small class="text-muted">Price per single serving. Must be non-negative.</small>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold">Description</label>
+              <textarea name="description" class="form-control" rows="3" placeholder="Ingredients, preparation style, or allergens...">{{ item.description if item else '' }}</textarea>
+            </div>
+
+            <div class="col-12">
+              <div class="form-check form-switch mt-2">
+                <input class="form-check-input" type="checkbox" name="is_available" value="1" id="isAvailableSwitch" {% if not item or item.is_available %}checked{% endif %}>
+                <label class="form-check-label fw-semibold" for="isAvailableSwitch">
+                  Mark as Available for Ordering
+                </label>
+                <div class="text-muted small">Unavailable items are kept in catalog history but hidden from new order entry.</div>
+              </div>
+            </div>
+
+            <div class="col-12 mt-4 d-flex justify-content-end gap-2">
+              <a href="{{ url_for('menu.index') }}" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-emerald">
+                <i class="bi bi-check-lg me-1"></i>{% if is_edit %}Save Changes{% else %}Create Item{% endif %}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

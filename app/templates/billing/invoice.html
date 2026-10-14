@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Invoice {{ invoice.invoice_number }} - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+  <div>
+    <h3 class="fw-bold mb-1">Official Tax Invoice</h3>
+    <p class="text-muted small mb-0">Invoice #{{ invoice.invoice_number }} &bull; Status: <span class="badge bg-success-subtle text-success">Finalized & Immutable</span></p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('billing.history') }}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Billing History
+    </a>
+    <button id="printInvoiceBtn" class="btn btn-emerald">
+      <i class="bi bi-printer me-1"></i>Print Invoice
+    </button>
+  </div>
+</div>
+
+<!-- Printable Invoice Card Box -->
+<div class="invoice-box">
+  <!-- Header -->
+  <div class="invoice-header d-flex justify-content-between align-items-start">
+    <div>
+      <h2 class="fw-bold mb-1 text-emerald" style="color: #0f766e;">{{ invoice.restaurant_name }}</h2>
+      <div class="text-secondary small">{{ invoice.restaurant_address }}</div>
+      <div class="text-secondary small">Phone: {{ invoice.restaurant_contact }}</div>
+    </div>
+    <div class="text-end">
+      <div class="badge bg-light text-dark border fs-6 px-3 py-2 mb-1">TAX INVOICE</div>
+      <div class="fw-bold text-dark fs-5">{{ invoice.invoice_number }}</div>
+      <div class="text-muted small">Date: {{ invoice.invoice_date[:10] }}</div>
+      <div class="text-muted small">Time: {{ invoice.invoice_date[11:19] }} UTC</div>
+    </div>
+  </div>
+
+  <!-- Order & Customer Meta -->
+  <div class="row mb-4 p-3 bg-light rounded g-2">
+    <div class="col-md-3 col-6">
+      <div class="text-muted small">Order Number</div>
+      <div class="fw-bold text-dark">{{ invoice.order_number }}</div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="text-muted small">Order Type / Table</div>
+      <div class="fw-bold text-dark">{{ invoice.order_type }} ({{ invoice.table_number or "Counter" }})</div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="text-muted small">Customer Name</div>
+      <div class="fw-bold text-dark">{{ invoice.customer_name or "Walk-in Guest" }}</div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="text-muted small">Contact Number</div>
+      <div class="fw-bold text-dark">{{ invoice.customer_contact or "—" }}</div>
+    </div>
+  </div>
+
+  <!-- Items Table -->
+  <table class="table table-bordered mb-4 align-middle">
+    <thead style="background-color: #f8fafc;">
+      <tr>
+        <th style="width: 50px;">#</th>
+        <th>Item Description</th>
+        <th class="text-end" style="width: 120px;">Unit Price</th>
+        <th class="text-center" style="width: 100px;">Qty</th>
+        <th class="text-end" style="width: 140px;">Line Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td class="fw-semibold text-dark">{{ item.item_name }}</td>
+          <td class="text-end">{{ currency_symbol }}{{ "%.2f"|format(item.unit_price) }}</td>
+          <td class="text-center">{{ item.quantity }}</td>
+          <td class="text-end fw-semibold">{{ currency_symbol }}{{ "%.2f"|format(item.line_total) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Calculation Summary Block -->
+  <div class="row align-items-end mb-4">
+    <div class="col-md-6">
+      <div class="p-3 border rounded bg-light">
+        <div class="small fw-bold text-secondary mb-1">TQM Policy Note:</div>
+        <div class="small text-muted mb-1">
+          Financial values calculated using Decimal arithmetic with <code>{{ invoice.rounding_policy }}</code> rounding policy.
+        </div>
+        <div class="small text-muted">
+          Historical line prices are preserved from order entry timestamp.
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <table class="table table-borderless table-sm invoice-totals-table mb-0">
+        <tbody>
+          <tr>
+            <td class="text-muted">Subtotal:</td>
+            <td class="text-end fw-semibold">{{ currency_symbol }}{{ "%.2f"|format(invoice.subtotal) }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted">Discount ({{ "%.1f"|format(invoice.discount_rate) }}%):</td>
+            <td class="text-end text-danger fw-semibold">&minus; {{ currency_symbol }}{{ "%.2f"|format(invoice.discount_amount) }}</td>
+          </tr>
+          <tr class="border-top">
+            <td class="text-muted">Taxable Amount:</td>
+            <td class="text-end fw-semibold">{{ currency_symbol }}{{ "%.2f"|format(invoice.taxable_amount) }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted">Tax ({{ "%.1f"|format(invoice.tax_rate) }}%):</td>
+            <td class="text-end text-primary fw-semibold">+ {{ currency_symbol }}{{ "%.2f"|format(invoice.tax_amount) }}</td>
+          </tr>
+          <tr class="invoice-grand-total">
+            <td class="fw-bold">Grand Total:</td>
+            <td class="text-end fw-bold">{{ currency_symbol }}{{ "%.2f"|format(invoice.grand_total) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer Note -->
+  <div class="text-center pt-4 border-top">
+    <div class="fw-medium text-dark">{{ footer_text }}</div>
+    <small class="text-muted">Total Quality Management Certified &bull; Course Project: BBAT104 &bull; Student: Swati Melkani</small>
+  </div>
+</div>
+{% endblock %}

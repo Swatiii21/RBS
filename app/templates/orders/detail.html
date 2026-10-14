@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}Order {{ order.order_number }} - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <h3 class="fw-bold mb-0">Order Ticket: {{ order.order_number }}</h3>
+      {% if order.status == 'Draft' %}
+        <span class="badge badge-status badge-draft"><i class="bi bi-clock me-1"></i>Draft (Open)</span>
+      {% elif order.status == 'Finalized' %}
+        <span class="badge badge-status badge-finalized"><i class="bi bi-check2-all me-1"></i>Finalized</span>
+      {% else %}
+        <span class="badge badge-status badge-cancelled"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
+      {% endif %}
+    </div>
+    <p class="text-muted small mb-0">
+      Type: <strong>{{ order.order_type }}</strong> &bull;
+      Table: <strong>{{ order.table_number or "Takeaway Counter" }}</strong> &bull;
+      Guest: <strong>{{ order.customer_name or "Walk-in Guest" }}</strong> &bull;
+      Created: <strong>{{ order.created_at[:19].replace('T', ' ') }}</strong>
+    </p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('orders.index') }}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Orders List
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Left Column: Item Selector & Cart Table -->
+  <div class="col-lg-8">
+    {% if order.status == 'Draft' %}
+      <!-- Add Item Card -->
+      <div class="card-custom mb-4">
+        <div class="card-custom-header bg-light">
+          <h5 class="mb-0 text-success"><i class="bi bi-cart-plus me-2"></i>Add Dishes to Order</h5>
+        </div>
+        <div class="card-custom-body">
+          <form method="POST" action="{{ url_for('orders.add_item', order_id=order.id) }}" class="row g-2 align-items-end">
+            <div class="col-md-7">
+              <label class="form-label small fw-semibold">Select Dish from Available Menu</label>
+              <select name="menu_item_id" class="form-select" required>
+                <option value="" disabled selected>-- Choose Menu Item --</option>
+                {% for dish in available_menu %}
+                  <option value="{{ dish.id }}">
+                    [{{ dish.category }}] {{ dish.name }} &mdash; {{ currency_symbol }}{{ "%.2f"|format(dish.unit_price) }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold">Quantity</label>
+              <input type="number" name="quantity" class="form-control" value="1" min="1" max="50" required>
+            </div>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-emerald w-100">
+                <i class="bi bi-plus-lg me-1"></i>Add
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div class="alert alert-info card-custom p-3 mb-4">
+        <i class="bi bi-info-circle-fill me-2"></i>
+        This order is <strong>{{ order.status }}</strong>. Line items and historical prices are frozen and read-only.
+      </div>
+    {% endif %}
+
+    <!-- Cart Items Table -->
+    <div class="card-custom">
+      <div class="card-custom-header">
+        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Order Items ({{ items|length }})</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-custom align-middle">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Item Name</th>
+              <th>Unit Price</th>
+              <th style="width: 140px;">Quantity</th>
+              <th class="text-end">Line Total</th>
+              {% if order.status == 'Draft' %}
+                <th class="text-end">Action</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td class="fw-semibold text-dark">{{ item.item_name }}</td>
+                <td>{{ currency_symbol }}{{ "%.2f"|format(item.unit_price) }}</td>
+                <td>
+                  {% if order.status == 'Draft' %}
+                    <form method="POST" action="{{ url_for('orders.update_item_qty', order_id=order.id, order_item_id=item.id) }}" class="d-flex align-items-center gap-1">
+                      <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="100" class="form-control form-control-sm text-center" style="width: 65px;">
+                      <button type="submit" class="btn btn-sm btn-outline-secondary" title="Update Quantity">
+                        <i class="bi bi-check"></i>
+                      </button>
+                    </form>
+                  {% else %}
+                    <span class="badge bg-light text-dark border px-2 py-1">{{ item.quantity }}</span>
+                  {% endif %}
+                </td>
+                <td class="text-end fw-bold text-success">{{ currency_symbol }}{{ "%.2f"|format(item.line_total) }}</td>
+                {% if order.status == 'Draft' %}
+                  <td class="text-end">
+                    <form method="POST" action="{{ url_for('orders.delete_item', order_id=order.id, order_item_id=item.id) }}">
+                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Item">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </form>
+                  </td>
+                {% endif %}
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="text-center py-5 text-muted">
+                  <i class="bi bi-basket fs-2 d-block mb-2 text-secondary"></i>
+                  No dishes added yet. Use the menu selector above to add items.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Billing Breakdown & Actions -->
+  <div class="col-lg-4">
+    <!-- Billing Calculation Card -->
+    <div class="card-custom mb-4">
+      <div class="card-custom-header">
+        <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Bill Breakdown</h5>
+        <span class="badge bg-secondary-subtle text-secondary small">Server-Verified</span>
+      </div>
+      <div class="card-custom-body p-3">
+        <table class="table table-borderless table-sm mb-3">
+          <tbody>
+            <tr>
+              <td class="text-muted">Item Subtotal:</td>
+              <td class="text-end fw-semibold">{{ currency_symbol }}{{ "%.2f"|format(order.subtotal) }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">Discount Rate:</td>
+              <td class="text-end text-danger fw-semibold">{{ "%.1f"|format(order.discount_rate) }}%</td>
+            </tr>
+            <tr>
+              <td class="text-muted">Discount Amount:</td>
+              <td class="text-end text-danger">&minus; {{ currency_symbol }}{{ "%.2f"|format(order.discount_amount) }}</td>
+            </tr>
+            <tr class="border-top">
+              <td class="text-muted">Taxable Amount:</td>
+              <td class="text-end fw-semibold">{{ currency_symbol }}{{ "%.2f"|format(order.taxable_amount) }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">Applicable Tax ({{ "%.1f"|format(order.tax_rate) }}%):</td>
+              <td class="text-end text-primary fw-semibold">+ {{ currency_symbol }}{{ "%.2f"|format(order.tax_amount) }}</td>
+            </tr>
+            <tr class="border-top border-2 border-dark">
+              <td class="fw-bold fs-5 text-dark">Grand Total:</td>
+              <td class="text-end fw-bold fs-5 text-success">{{ currency_symbol }}{{ "%.2f"|format(order.grand_total) }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        {% if order.status == 'Draft' %}
+          <!-- Discount Adjustment Form -->
+          <div class="bg-light p-2 rounded mb-3">
+            <form method="POST" action="{{ url_for('orders.update_discount', order_id=order.id) }}" class="d-flex gap-2 align-items-center">
+              <label class="form-label small fw-semibold mb-0 text-nowrap">Discount (%):</label>
+              <input type="number" step="0.5" min="0" max="{{ max_discount }}" name="discount_rate" value="{{ order.discount_rate }}" class="form-control form-control-sm">
+              <button type="submit" class="btn btn-sm btn-outline-dark">Apply</button>
+            </form>
+            <div class="text-muted" style="font-size: 0.7rem;">Max permitted discount: {{ max_discount }}%</div>
+          </div>
+
+          <!-- Finalize Button Form -->
+          <form method="POST" action="{{ url_for('billing.finalize', order_id=order.id) }}" data-confirm="Are you sure you want to finalize this order? This will issue an official immutable invoice." class="mb-2">
+            <button type="submit" class="btn btn-emerald w-100 py-2 fw-semibold" {% if not items %}disabled{% endif %}>
+              <i class="bi bi-receipt me-1"></i>Finalize Bill & Issue Invoice
+            </button>
+            {% if not items %}
+              <div class="text-danger small mt-1 text-center">Add at least one dish to finalize bill.</div>
+            {% endif %}
+          </form>
+
+          <!-- Cancel Order Form -->
+          <form method="POST" action="{{ url_for('orders.cancel', order_id=order.id) }}" data-confirm="Are you sure you want to cancel this draft order?">
+            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+              <i class="bi bi-x-circle me-1"></i>Cancel Order
+            </button>
+          </form>
+        {% elif order.status == 'Finalized' %}
+          <div class="text-center py-2">
+            <a href="{{ url_for('billing.history', search=order.order_number) }}" class="btn btn-emerald w-100 py-2 fw-semibold">
+              <i class="bi bi-printer me-1"></i>View Official Invoice
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
