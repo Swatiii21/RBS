@@ -1,0 +1,29 @@
+{
+  "restaurant_profile": {
+    "restaurant_name": "Emerald Dine Restaurant",
+    "address": "124 Parkview Avenue, Civil Lines, Dehradun, Uttarakhand - 248001",
+    "contact_number": "+91 98765 43210",
+    "email": "contact@emeralddine.com",
+    "invoice_footer_text": "Thank you for dining with us! Please visit again. Total Quality Management Certified."
+  },
+  "billing_settings": {
+    "currency_symbol": "₹",
+    "default_tax_rate": 5.0,
+    "max_discount_percentage": 25.0,
+    "invoice_prefix": "INV-",
+    "invoice_numbering_policy": "SEQUENTIAL_YEAR",
+    "rounding_policy": "ROUND_HALF_UP"
+  },
+  "application_settings": {
+    "app_name": "Restaurant Billing System — Q11",
+    "default_page_size": 15,
+    "date_format": "%Y-%m-%d",
+    "time_format": "%H:%M:%S",
+    "activity_log_retention_days": 90
+  },
+  "logging_settings": {
+    "min_log_level": "INFO",
+    "log_retention_duration_days": 30,
+    "log_successful_actions": true
+  }
+}
