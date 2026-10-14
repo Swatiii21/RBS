@@ -1,0 +1,369 @@
+/* ==============================================================================
+   Restaurant Billing System — TQM Q11: Improve Maintainability
+   Student: Swati Melkani (CSE - B, 2026-27)
+   Course: BBAT104 — Fundamentals of Total Quality Management
+   ============================================================================== */
+
+:root {
+  --primary-emerald: #0f766e;
+  --primary-emerald-hover: #115e59;
+  --primary-light: #f0fdf4;
+  --primary-border: #a7f3d0;
+  --accent-green: #10b981;
+  --neutral-dark: #1e293b;
+  --neutral-gray: #64748b;
+  --neutral-light: #f8fafc;
+  --neutral-border: #e2e8f0;
+  --white: #ffffff;
+  --sidebar-width: 260px;
+  --sidebar-bg: #064e3b;
+  --card-radius: 12px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f1f5f9;
+  color: var(--neutral-dark);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--sidebar-bg);
+  color: #ecfdf5;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 1.5rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.sidebar-badge {
+  font-size: 0.72rem;
+  background-color: #047857;
+  color: #a7f3d0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-weight: 600;
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: 1rem 0.75rem;
+  margin: 0;
+  flex: 1;
+}
+
+.nav-section-title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6ee7b7;
+  padding: 0.75rem 0.75rem 0.25rem 0.75rem;
+  font-weight: 700;
+}
+
+.nav-item {
+  margin-bottom: 0.2rem;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  color: #d1fae5;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.nav-link.active {
+  background-color: #059669;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-footer {
+  padding: 1rem 1.25rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  font-size: 0.75rem;
+  color: #a7f3d0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Main Content Wrapper */
+.main-wrapper {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.top-navbar {
+  background-color: var(--white);
+  border-bottom: 1px solid var(--neutral-border);
+  padding: 0.85rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.content-body {
+  padding: 2rem;
+  flex: 1;
+}
+
+/* Custom Cards */
+.card-custom {
+  background: var(--white);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+  transition: box-shadow 0.2s ease;
+}
+
+.card-custom:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card-custom-header {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--neutral-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-custom-header h5 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--neutral-dark);
+}
+
+.card-custom-body {
+  padding: 1.5rem;
+}
+
+/* Stat Cards */
+.stat-card {
+  padding: 1.25rem;
+  border-radius: var(--card-radius);
+  background: var(--white);
+  border: 1px solid var(--neutral-border);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.stat-icon.emerald {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.stat-icon.blue {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.stat-icon.amber {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.stat-icon.purple {
+  background-color: #ede9fe;
+  color: #5b21b6;
+}
+
+.stat-val {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--neutral-dark);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--neutral-gray);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Primary buttons */
+.btn-emerald {
+  background-color: var(--primary-emerald);
+  color: #ffffff;
+  border: none;
+  font-weight: 500;
+  padding: 0.55rem 1.15rem;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.btn-emerald:hover {
+  background-color: var(--primary-emerald-hover);
+  color: #ffffff;
+}
+
+.btn-outline-emerald {
+  border: 1px solid var(--primary-emerald);
+  color: var(--primary-emerald);
+  background: transparent;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+.btn-outline-emerald:hover {
+  background-color: var(--primary-emerald);
+  color: #ffffff;
+}
+
+/* Table styling */
+.table-custom {
+  width: 100%;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
+
+.table-custom th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  border-bottom: 2px solid var(--neutral-border);
+  padding: 0.75rem 1rem;
+}
+
+.table-custom td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--neutral-border);
+  vertical-align: middle;
+}
+
+/* Badges */
+.badge-status {
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.badge-draft { background-color: #fef3c7; color: #92400e; }
+.badge-finalized { background-color: #d1fae5; color: #065f46; }
+.badge-cancelled { background-color: #fee2e2; color: #991b1b; }
+.badge-active { background-color: #dcfce7; color: #166534; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--neutral-gray);
+}
+
+.empty-state svg {
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* Printable Invoice */
+@media print {
+  body {
+    background-color: #ffffff !important;
+  }
+  .sidebar, .top-navbar, .no-print, .btn, .alert {
+    display: none !important;
+  }
+  .main-wrapper {
+    margin-left: 0 !important;
+  }
+  .content-body {
+    padding: 0 !important;
+  }
+  .invoice-box {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+}
+
+.invoice-box {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2.5rem;
+  background: #ffffff;
+  border: 1px solid var(--neutral-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+}
+
+.invoice-header {
+  border-bottom: 2px solid #0f766e;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.invoice-totals-table {
+  width: 320px;
+  margin-left: auto;
+}
+
+.invoice-totals-table td {
+  padding: 0.4rem 0.6rem;
+}
+
+.invoice-grand-total {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f766e;
+  border-top: 2px solid #0f766e;
+}
