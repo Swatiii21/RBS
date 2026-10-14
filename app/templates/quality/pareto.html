@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Pareto Analysis (80/20 Rule) - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold mb-1">TQM Pareto Analysis (80/20 Distribution)</h3>
+    <p class="text-muted small mb-0">
+      Separating the "Vital Few" defects from the "Trivial Many" using cumulative statistical frequency
+    </p>
+  </div>
+  <a href="{{ url_for('quality.defects') }}" class="btn btn-outline-emerald">
+    <i class="bi bi-clipboard-check me-1"></i>View Defect Register
+  </a>
+</div>
+
+{% if pareto_data.has_data %}
+  <div class="row g-4 mb-4">
+    <!-- Pareto Chart -->
+    <div class="col-lg-8">
+      <div class="card-custom h-100">
+        <div class="card-custom-header">
+          <h5><i class="bi bi-bar-chart-steps text-success me-2"></i>Pareto Defect Distribution</h5>
+          <span class="badge bg-light text-dark border">Dual-Axis Statistical Chart</span>
+        </div>
+        <div class="card-custom-body">
+          <canvas id="paretoChart" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytical Findings Box -->
+    <div class="col-lg-4">
+      <div class="card-custom h-100">
+        <div class="card-custom-header">
+          <h5><i class="bi bi-lightbulb text-warning me-2"></i>Fact-Based Analysis</h5>
+        </div>
+        <div class="card-custom-body">
+          <div class="p-3 bg-light rounded mb-3">
+            <div class="small text-muted">Total Defect Occurrences Analyzed</div>
+            <h3 class="fw-bold text-dark mb-0">{{ pareto_data.total_occurrences }}</h3>
+          </div>
+
+          <h6 class="fw-bold text-dark mb-2">Identified Vital Few:</h6>
+          <ul class="list-group list-group-flush mb-3">
+            {% for vf in pareto_data.vital_few %}
+              <li class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center small">
+                <span class="fw-semibold text-danger"><i class="bi bi-exclamation-circle me-1"></i>{{ vf }}</span>
+                <span class="badge bg-danger-subtle text-danger">Priority Action</span>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <div class="alert alert-info py-2 small mb-0">
+            <strong>TQM Principle:</strong> {{ pareto_data.summary_text }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cumulative Data Table -->
+  <div class="card-custom">
+    <div class="card-custom-header">
+      <h5 class="mb-0">Pareto Calculation Matrix</h5>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-custom align-middle">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Defect Category</th>
+            <th>Occurrences (Frequency)</th>
+            <th>Cumulative %</th>
+            <th>TQM Classification</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for label in pareto_data.labels %}
+            {% set cnt = pareto_data.counts[loop.index0] %}
+            {% set pct = pareto_data.cumulative_percentages[loop.index0] %}
+            <tr>
+              <td><span class="badge bg-light text-dark border">{{ loop.index }}</span></td>
+              <td class="fw-semibold text-dark">{{ label }}</td>
+              <td class="fw-bold text-success">{{ cnt }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress flex-fill" style="height: 8px;">
+                    <div class="progress-bar {% if pct <= 80.0 %}bg-danger{% else %}bg-secondary{% endif %}" style="width: {{ pct }}%;"></div>
+                  </div>
+                  <span class="small fw-bold">{{ pct }}%</span>
+                </div>
+              </td>
+              <td>
+                {% if pct <= 80.0 %}
+                  <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Vital Few</span>
+                {% else %}
+                  <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Trivial Many</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% else %}
+  <div class="card-custom text-center py-5">
+    <div class="card-custom-body">
+      <i class="bi bi-bar-chart-line fs-1 text-muted d-block mb-3"></i>
+      <h4>No Defect Observations Recorded</h4>
+      <p class="text-secondary mb-4">{{ pareto_data.summary_text }}</p>
+      <a href="{{ url_for('quality.defects') }}" class="btn btn-emerald">
+        <i class="bi bi-plus-circle me-1"></i>Add Defect Observations
+      </a>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if pareto_data.has_data %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const ctx = document.getElementById("paretoChart");
+    if (ctx) {
+      new Chart(ctx, {
+        data: {
+          labels: {{ pareto_data.labels|tojson }},
+          datasets: [
+            {
+              type: "bar",
+              label: "Defect Occurrences",
+              data: {{ pareto_data.counts|tojson }},
+              backgroundColor: "#0f766e",
+              yAxisID: "y"
+            },
+            {
+              type: "line",
+              label: "Cumulative %",
+              data: {{ pareto_data.cumulative_percentages|tojson }},
+              borderColor: "#ef4444",
+              backgroundColor: "#ef4444",
+              borderWidth: 2,
+              fill: false,
+              tension: 0.2,
+              yAxisID: "y1"
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: "Frequency (Occurrences)" }
+            },
+            y1: {
+              beginAtZero: true,
+              max: 100,
+              position: "right",
+              title: { display: true, text: "Cumulative Percentage (%)" },
+              grid: { drawOnChartArea: false }
+            }
+          }
+        }
+      });
+    }
+  });
+</script>
+{% endif %}
+{% endblock %}

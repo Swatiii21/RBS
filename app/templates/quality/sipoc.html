@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}SIPOC Process Map - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold mb-1">SIPOC Process Map: Restaurant Billing Operations</h3>
+    <p class="text-muted small mb-0">
+      Suppliers &rarr; Inputs &rarr; Process &rarr; Outputs &rarr; Customers architecture
+    </p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <!-- S -->
+  <div class="col-md-2 col-sm-6">
+    <div class="card-custom h-100 border-start border-4 border-primary">
+      <div class="card-custom-header py-2 bg-light">
+        <h6 class="mb-0 fw-bold text-primary">Suppliers</h6>
+      </div>
+      <div class="card-custom-body p-3 small text-secondary">
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2">&bull; <strong>Dining Guests</strong> (order requirements)</li>
+          <li class="mb-2">&bull; <strong>Service Staff</strong> (pos order inputs)</li>
+          <li class="mb-2">&bull; <strong>Admin Manager</strong> (menu & tax settings)</li>
+          <li>&bull; <strong>Kitchen Staff</strong> (item availability)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- I -->
+  <div class="col-md-3 col-sm-6">
+    <div class="card-custom h-100 border-start border-4 border-info">
+      <div class="card-custom-header py-2 bg-light">
+        <h6 class="mb-0 fw-bold text-info">Inputs</h6>
+      </div>
+      <div class="card-custom-body p-3 small text-secondary">
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2">&bull; Menu catalog (names, categories, prices)</li>
+          <li class="mb-2">&bull; Service type (Dine-in table or Takeaway)</li>
+          <li class="mb-2">&bull; Dish item quantities requested</li>
+          <li class="mb-2">&bull; Configured tax rate %</li>
+          <li>&bull; Promotional discount rates %</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- P -->
+  <div class="col-md-3 col-sm-12">
+    <div class="card-custom h-100 border-start border-4 border-success">
+      <div class="card-custom-header py-2 bg-light">
+        <h6 class="mb-0 fw-bold text-success">Process (6 Steps)</h6>
+      </div>
+      <div class="card-custom-body p-3 small text-secondary">
+        <ol class="ps-3 mb-0">
+          <li class="mb-1">Order ticket creation</li>
+          <li class="mb-1">Item addition & cart aggregation</li>
+          <li class="mb-1">Server validation (limits & prices)</li>
+          <li class="mb-1">Decimal financial calculation</li>
+          <li class="mb-1">ACID transactional finalization</li>
+          <li>Invoice dispatch & audit logging</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- O -->
+  <div class="col-md-2 col-sm-6">
+    <div class="card-custom h-100 border-start border-4 border-warning">
+      <div class="card-custom-header py-2 bg-light">
+        <h6 class="mb-0 fw-bold text-warning">Outputs</h6>
+      </div>
+      <div class="card-custom-body p-3 small text-secondary">
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2">&bull; Printable Tax Invoice document</li>
+          <li class="mb-2">&bull; Finalized financial ledger entry</li>
+          <li class="mb-2">&bull; Audit activity log entry</li>
+          <li>&bull; Sales dashboard summary updates</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="col-md-2 col-sm-6">
+    <div class="card-custom h-100 border-start border-4 border-danger">
+      <div class="card-custom-header py-2 bg-light">
+        <h6 class="mb-0 fw-bold text-danger">Customers</h6>
+      </div>
+      <div class="card-custom-body p-3 small text-secondary">
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2">&bull; <strong>Dining Guests</strong> (accurate billing)</li>
+          <li class="mb-2">&bull; <strong>Cashier Staff</strong> (rapid checkout)</li>
+          <li class="mb-2">&bull; <strong>Management</strong> (revenue insights)</li>
+          <li>&bull; <strong>Tax Auditor</strong> (verifiable logs)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

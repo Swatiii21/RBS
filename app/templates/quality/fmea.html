@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}FMEA Matrix & RPN - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold mb-1">Failure Mode and Effects Analysis (FMEA)</h3>
+    <p class="text-muted small mb-0">
+      Systematic risk prioritization calculating Risk Priority Number: 
+      <code>RPN = Severity (1–10) &times; Occurrence (1–10) &times; Detection (1–10)</code>
+    </p>
+  </div>
+  <button class="btn btn-emerald" data-bs-toggle="modal" data-bs-target="#newFmeaModal">
+    <i class="bi bi-plus-circle me-1"></i>Assess New Failure Mode
+  </button>
+</div>
+
+<!-- FMEA Matrix Table -->
+<div class="card-custom">
+  <div class="card-custom-header">
+    <h5 class="mb-0">FMEA Risk Register</h5>
+    <span class="text-muted small">Higher RPN indicates higher mitigation priority</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-custom align-middle">
+      <thead>
+        <tr>
+          <th>Process Step</th>
+          <th>Potential Failure Mode & Cause</th>
+          <th>Potential Effect</th>
+          <th class="text-center" style="width: 50px;">S</th>
+          <th class="text-center" style="width: 50px;">O</th>
+          <th class="text-center" style="width: 50px;">D</th>
+          <th class="text-center" style="width: 80px;">RPN</th>
+          <th>Recommended Mitigation</th>
+          <th>Responsible</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+          <tr>
+            <td class="fw-bold text-dark">{{ r.process_step }}</td>
+            <td style="max-width: 250px;">
+              <div class="fw-semibold text-danger">{{ r.potential_failure_mode }}</div>
+              <small class="text-muted">Cause: {{ r.potential_cause }}</small>
+            </td>
+            <td class="small text-secondary" style="max-width: 220px;">
+              {{ r.potential_effect }}
+            </td>
+            <td class="text-center">{{ r.severity }}</td>
+            <td class="text-center">{{ r.occurrence }}</td>
+            <td class="text-center">{{ r.detection }}</td>
+            <td class="text-center">
+              <span class="badge {% if r.rpn >= 150 %}bg-danger fs-6{% elif r.rpn >= 90 %}bg-warning text-dark fs-6{% else %}bg-secondary fs-6{% endif %}">
+                {{ r.rpn }}
+              </span>
+            </td>
+            <td class="small text-dark" style="max-width: 250px;">
+              {{ r.recommended_mitigation }}
+            </td>
+            <td class="small text-muted">{{ r.responsible_role }}</td>
+            <td>
+              <span class="badge {% if r.status == 'Mitigated' %}bg-success-subtle text-success border border-success-subtle{% else %}bg-warning-subtle text-warning border border-warning-subtle{% endif %}">
+                {{ r.status }}
+              </span>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal: Add FMEA Record -->
+<div class="modal fade" id="newFmeaModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('quality.fmea') }}">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title fw-bold"><i class="bi bi-shield-plus me-2 text-primary"></i>Assess New Failure Mode</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Process Step / Module <span class="text-danger">*</span></label>
+              <input type="text" name="process_step" class="form-control" placeholder="e.g. Billing Calculation, Order Input" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Responsible Role <span class="text-danger">*</span></label>
+              <input type="text" name="responsible_role" class="form-control" placeholder="e.g. Backend Lead, Admin" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Potential Failure Mode <span class="text-danger">*</span></label>
+              <input type="text" name="potential_failure_mode" class="form-control" placeholder="Specific failure symptom..." required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Potential Effect on Customer / System <span class="text-danger">*</span></label>
+              <textarea name="potential_effect" class="form-control" rows="2" required></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Potential Cause of Failure <span class="text-danger">*</span></label>
+              <textarea name="potential_cause" class="form-control" rows="2" required></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Existing Controls in Place</label>
+              <input type="text" name="existing_controls" class="form-control" placeholder="Current checks or safeguards...">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Severity (1–10) <span class="text-danger">*</span></label>
+              <input type="number" min="1" max="10" name="severity" class="form-control" value="5" required>
+              <small class="text-muted">10 = Catastrophic financial/system error</small>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Occurrence (1–10) <span class="text-danger">*</span></label>
+              <input type="number" min="1" max="10" name="occurrence" class="form-control" value="5" required>
+              <small class="text-muted">10 = Extremely frequent failure</small>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Detection (1–10) <span class="text-danger">*</span></label>
+              <input type="number" min="1" max="10" name="detection" class="form-control" value="5" required>
+              <small class="text-muted">10 = Zero chance of catching prior to client</small>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Recommended Mitigation <span class="text-danger">*</span></label>
+              <textarea name="recommended_mitigation" class="form-control" rows="2" placeholder="Proposed architectural or code improvement..." required></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-emerald">Compute RPN & Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

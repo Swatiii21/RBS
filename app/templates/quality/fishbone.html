@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Ishikawa (Fishbone) Diagram - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold mb-1">Ishikawa / Fishbone Diagram (Root-Cause Taxonomy)</h3>
+    <p class="text-muted small mb-0">
+      Categorizing potential root causes of restaurant billing inaccuracies across 6 quality dimensions
+    </p>
+  </div>
+</div>
+
+<!-- Fishbone Grid -->
+<div class="row g-4 mb-4">
+  {% for dimension, cause_list in causes.items() %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card-custom h-100">
+        <div class="card-custom-header bg-light">
+          <h5 class="mb-0">
+            {% if dimension == 'People' %}
+              <i class="bi bi-people text-primary me-2"></i>
+            {% elif dimension == 'Process' %}
+              <i class="bi bi-diagram-2 text-warning me-2"></i>
+            {% elif dimension == 'Software Code' %}
+              <i class="bi bi-code-slash text-danger me-2"></i>
+            {% elif dimension == 'Database' %}
+              <i class="bi bi-database text-success me-2"></i>
+            {% elif dimension == 'Testing' %}
+              <i class="bi bi-check2-circle text-info me-2"></i>
+            {% else %}
+              <i class="bi bi-hdd-network text-secondary me-2"></i>
+            {% endif %}
+            {{ dimension }}
+          </h5>
+        </div>
+        <div class="card-custom-body p-3">
+          <ul class="list-group list-group-flush">
+            {% for item in cause_list %}
+              <li class="list-group-item px-0 py-2 border-bottom">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                  <div class="fw-medium text-dark small">{{ item.cause }}</div>
+                  <span class="badge {% if 'Mitigated' in item.status %}bg-success-subtle text-success border border-success-subtle{% elif item.status == 'Verified' %}bg-danger-subtle text-danger border border-danger-subtle{% else %}bg-secondary-subtle text-secondary border border-secondary-subtle{% endif %} small text-nowrap">
+                    {{ item.status }}
+                  </span>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Academic Takeaway Note -->
+<div class="card-custom">
+  <div class="card-custom-header">
+    <h5 class="mb-0"><i class="bi bi-mortarboard me-2 text-primary"></i>TQM Course Application & Q11 Solution Mapping</h5>
+  </div>
+  <div class="card-custom-body small text-secondary">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <strong class="text-dark d-block mb-1">Root Cause Identified:</strong>
+        Dynamic queries on live menu catalog caused past customer receipts to silently change when prices were revised.
+      </div>
+      <div class="col-md-4">
+        <strong class="text-dark d-block mb-1">Q11 Engineering Solution:</strong>
+        Implemented item snapshot pricing: item name and price are written directly into <code>order_items</code> and <code>invoices</code> at the time of purchase.
+      </div>
+      <div class="col-md-4">
+        <strong class="text-dark d-block mb-1">TQM Outcome:</strong>
+        Zero retroactive financial alteration; immutable customer records complying with audit standards.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

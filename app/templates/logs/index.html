@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Activity Logs - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold mb-1">Business Activity & Audit Logs</h3>
+    <p class="text-muted small mb-0">
+      <span class="badge bg-success-subtle text-success me-1">Q11 Feature: Activity Logs</span>
+      Immutable audit trail tracking user interactions, financial updates, and system events
+    </p>
+  </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="card-custom mb-4">
+  <div class="card-custom-body py-3">
+    <form method="GET" action="{{ url_for('logs.index') }}" class="row g-2 align-items-center">
+      <div class="col-md-4">
+        <input type="text" name="search" class="form-control" placeholder="Search description, actor, record #..." value="{{ current_search }}">
+      </div>
+      <div class="col-md-3">
+        <select name="module" class="form-select">
+          <option value="">All Subsystems / Modules</option>
+          <option value="Menu" {% if current_module == 'Menu' %}selected{% endif %}>Menu Management</option>
+          <option value="Orders" {% if current_module == 'Orders' %}selected{% endif %}>Order Management</option>
+          <option value="Billing" {% if current_module == 'Billing' %}selected{% endif %}>Billing & Invoicing</option>
+          <option value="Settings" {% if current_module == 'Settings' %}selected{% endif %}>System Settings</option>
+          <option value="Quality" {% if current_module == 'Quality' %}selected{% endif %}>TQM Quality Hub</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select name="outcome" class="form-select">
+          <option value="">All Outcomes</option>
+          <option value="Success" {% if current_outcome == 'Success' %}selected{% endif %}>Success</option>
+          <option value="Warning" {% if current_outcome == 'Warning' %}selected{% endif %}>Warning</option>
+          <option value="Failure" {% if current_outcome == 'Failure' %}selected{% endif %}>Failure</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-emerald flex-fill">Filter</button>
+        <a href="{{ url_for('logs.index') }}" class="btn btn-outline-secondary">Reset</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Logs Table -->
+<div class="card-custom">
+  <div class="card-custom-header">
+    <h5 class="mb-0">Audit Records ({{ total }} total)</h5>
+    <span class="text-muted small">Technical diagnostics stored in rotating file: <code>logs/app.log</code></span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-custom align-middle">
+      <thead>
+        <tr>
+          <th style="width: 70px;">ID</th>
+          <th style="width: 170px;">Timestamp</th>
+          <th>Module & Action</th>
+          <th>Actor</th>
+          <th>Affected Record</th>
+          <th>Outcome</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+          <tr>
+            <td><code>#{{ log.id }}</code></td>
+            <td class="small text-muted">{{ log.timestamp[:19].replace('T', ' ') }}</td>
+            <td>
+              <span class="badge bg-secondary-subtle text-dark border me-1">{{ log.module }}</span>
+              <span class="fw-semibold text-dark small">{{ log.action_type }}</span>
+            </td>
+            <td><span class="badge bg-light text-secondary border">{{ log.actor }}</span></td>
+            <td><code>{{ log.affected_record_id or "—" }}</code></td>
+            <td>
+              {% if log.outcome == 'Success' %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle">Success</span>
+              {% elif log.outcome == 'Warning' %}
+                <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Warning</span>
+              {% else %}
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Failure</span>
+              {% endif %}
+            </td>
+            <td class="small text-secondary">{{ log.description }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="bi bi-journal-x fs-2 d-block mb-2 text-secondary"></i>
+              No activity logs match the selected filter.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if total_pages > 1 %}
+    <div class="card-custom-body py-3 border-top d-flex justify-content-between align-items-center">
+      <small class="text-muted">Showing page {{ page }} of {{ total_pages }}</small>
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          {% for p in range(1, total_pages + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for('logs.index', page=p, search=current_search, module=current_module, outcome=current_outcome) }}">{{ p }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

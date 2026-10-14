@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}PDCA Continuous Improvement Tracker - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold mb-1">PDCA Continuous Improvement Register</h3>
+    <p class="text-muted small mb-0">
+      Deming Plan-Do-Check-Act cycles tracking defect reduction and maintainability enhancements
+    </p>
+  </div>
+</div>
+
+<div class="row g-4">
+  {% for c in cycles %}
+    <div class="col-12">
+      <div class="card-custom">
+        <div class="card-custom-header bg-light d-flex justify-content-between align-items-center">
+          <div>
+            <span class="badge bg-primary text-white me-2">{{ c.cycle_code }}</span>
+            <span class="fw-bold fs-6 text-dark">{{ c.title }}</span>
+          </div>
+          <div>
+            <span class="badge {% if c.status == 'Completed' %}bg-success{% else %}bg-warning text-dark{% endif %} px-2 py-1">
+              {{ c.status }}
+            </span>
+            <span class="small text-muted ms-2">Owner: <strong>{{ c.owner }}</strong> &bull; Target: {{ c.target_date }}</span>
+          </div>
+        </div>
+
+        <div class="card-custom-body p-4">
+          <div class="row g-3">
+            <!-- Plan -->
+            <div class="col-md-3">
+              <div class="p-3 border rounded h-100 bg-light">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="badge bg-danger rounded-circle">P</span>
+                  <strong class="text-dark">Plan (Problem & Target)</strong>
+                </div>
+                <div class="small text-secondary mb-2">
+                  <strong>Problem:</strong> {{ c.plan_problem }}
+                </div>
+                <div class="small text-secondary mb-2">
+                  <strong>Objective:</strong> {{ c.plan_objective }}
+                </div>
+                <div class="small text-secondary">
+                  <strong>Action:</strong> {{ c.plan_action }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Do -->
+            <div class="col-md-3">
+              <div class="p-3 border rounded h-100 bg-light">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="badge bg-primary rounded-circle">D</span>
+                  <strong class="text-dark">Do (Implementation)</strong>
+                </div>
+                <div class="small text-secondary mb-2">
+                  <strong>Change:</strong> {{ c.do_implemented_change }}
+                </div>
+                <div class="small text-muted">
+                  <strong>Linked Defect:</strong> <code class="text-primary">{{ c.do_linked_defect or "N/A" }}</code>
+                </div>
+              </div>
+            </div>
+
+            <!-- Check -->
+            <div class="col-md-3">
+              <div class="p-3 border rounded h-100 bg-light">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="badge bg-warning rounded-circle text-dark">C</span>
+                  <strong class="text-dark">Check (Verification)</strong>
+                </div>
+                <div class="small text-secondary mb-2">
+                  <strong>Retest Results:</strong> {{ c.check_retest_results }}
+                </div>
+                <div class="small text-success fw-medium">
+                  <strong>Metric Comparison:</strong> {{ c.check_metrics_comparison }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Act -->
+            <div class="col-md-3">
+              <div class="p-3 border rounded h-100 bg-light">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="badge bg-success rounded-circle">A</span>
+                  <strong class="text-dark">Act (Standardize & Learn)</strong>
+                </div>
+                <div class="small text-secondary mb-2">
+                  <strong>Decision:</strong> <span class="badge bg-success-subtle text-success border">{{ c.act_decision }}</span>
+                </div>
+                <div class="small text-secondary">
+                  <strong>Lessons Learned:</strong> {{ c.act_lessons_learned }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-12">
+      <div class="card-custom text-center py-5">
+        <p class="text-muted mb-0">No PDCA cycles recorded yet.</p>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

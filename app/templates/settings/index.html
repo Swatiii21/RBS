@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}System Settings - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold mb-1">System Settings & Configuration</h3>
+    <p class="text-muted small mb-0">
+      <span class="badge bg-success-subtle text-success me-1">Q11 Feature: System Settings</span>
+      Dynamic configuration persisted in database without requiring code edits or server restarts
+    </p>
+  </div>
+</div>
+
+<form method="POST" action="{{ url_for('settings.index') }}">
+  <div class="row g-4">
+    <!-- Restaurant Profile -->
+    <div class="col-lg-6">
+      <div class="card-custom h-100">
+        <div class="card-custom-header bg-light">
+          <h5><i class="bi bi-shop me-2 text-success"></i>Restaurant Profile</h5>
+        </div>
+        <div class="card-custom-body">
+          {% for s in grouped.get('restaurant_profile', []) %}
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-dark">{{ s.key|replace('_', ' ')|title }}</label>
+              {% if 'text' in s.key or 'address' in s.key %}
+                <textarea name="{{ s.key }}" class="form-control" rows="2">{{ s.value }}</textarea>
+              {% else %}
+                <input type="text" name="{{ s.key }}" class="form-control" value="{{ s.value }}" required>
+              {% endif %}
+              <div class="text-muted" style="font-size: 0.75rem;">{{ s.description }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Billing Settings -->
+    <div class="col-lg-6">
+      <div class="card-custom h-100">
+        <div class="card-custom-header bg-light">
+          <h5><i class="bi bi-currency-exchange me-2 text-primary"></i>Billing Policies & Tax Rules</h5>
+        </div>
+        <div class="card-custom-body">
+          {% for s in grouped.get('billing_settings', []) %}
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-dark">{{ s.key|replace('_', ' ')|title }}</label>
+              {% if s.key == 'rounding_policy' %}
+                <select name="{{ s.key }}" class="form-select">
+                  <option value="ROUND_HALF_UP" {% if s.value == 'ROUND_HALF_UP' %}selected{% endif %}>ROUND_HALF_UP (Standard 2-decimal commercial)</option>
+                  <option value="ROUND_CEIL" {% if s.value == 'ROUND_CEIL' %}selected{% endif %}>ROUND_CEIL (Ceiling)</option>
+                  <option value="ROUND_FLOOR" {% if s.value == 'ROUND_FLOOR' %}selected{% endif %}>ROUND_FLOOR (Floor)</option>
+                </select>
+              {% elif s.key in ('default_tax_rate', 'max_discount_percentage') %}
+                <div class="input-group">
+                  <input type="number" step="0.1" min="0" max="100" name="{{ s.key }}" class="form-control" value="{{ s.value }}" required>
+                  <span class="input-group-text">%</span>
+                </div>
+              {% else %}
+                <input type="text" name="{{ s.key }}" class="form-control" value="{{ s.value }}" required>
+              {% endif %}
+              <div class="text-muted" style="font-size: 0.75rem;">{{ s.description }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Application Settings -->
+    <div class="col-lg-6">
+      <div class="card-custom h-100">
+        <div class="card-custom-header bg-light">
+          <h5><i class="bi bi-display me-2 text-info"></i>Application Display Settings</h5>
+        </div>
+        <div class="card-custom-body">
+          {% for s in grouped.get('application_settings', []) %}
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-dark">{{ s.key|replace('_', ' ')|title }}</label>
+              {% if s.key == 'default_page_size' %}
+                <input type="number" min="5" max="100" name="{{ s.key }}" class="form-control" value="{{ s.value }}" required>
+              {% else %}
+                <input type="text" name="{{ s.key }}" class="form-control" value="{{ s.value }}" required>
+              {% endif %}
+              <div class="text-muted" style="font-size: 0.75rem;">{{ s.description }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Logging & Auditing Settings -->
+    <div class="col-lg-6">
+      <div class="card-custom h-100">
+        <div class="card-custom-header bg-light">
+          <h5><i class="bi bi-shield-lock me-2 text-warning"></i>Audit & Technical Logging Policies</h5>
+        </div>
+        <div class="card-custom-body">
+          {% for s in grouped.get('logging_settings', []) %}
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-dark">{{ s.key|replace('_', ' ')|title }}</label>
+              {% if s.key == 'min_log_level' %}
+                <select name="{{ s.key }}" class="form-select">
+                  <option value="DEBUG" {% if s.value == 'DEBUG' %}selected{% endif %}>DEBUG (Verbose Diagnostic)</option>
+                  <option value="INFO" {% if s.value == 'INFO' %}selected{% endif %}>INFO (Standard Operations)</option>
+                  <option value="WARNING" {% if s.value == 'WARNING' %}selected{% endif %}>WARNING (Anomalies Only)</option>
+                  <option value="ERROR" {% if s.value == 'ERROR' %}selected{% endif %}>ERROR (Failures Only)</option>
+                </select>
+              {% elif s.key == 'log_successful_actions' %}
+                <select name="{{ s.key }}" class="form-select">
+                  <option value="true" {% if s.value == 'true' %}selected{% endif %}>Enabled (Audit All Actions)</option>
+                  <option value="false" {% if s.value == 'false' %}selected{% endif %}>Disabled (Audit Errors Only)</option>
+                </select>
+              {% else %}
+                <input type="text" name="{{ s.key }}" class="form-control" value="{{ s.value }}" required>
+              {% endif %}
+              <div class="text-muted" style="font-size: 0.75rem;">{{ s.description }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Button -->
+    <div class="col-12 text-end">
+      <button type="submit" class="btn btn-emerald px-4 py-2 fw-semibold">
+        <i class="bi bi-floppy me-1"></i>Save System Settings
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock %}

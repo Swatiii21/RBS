@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% block title %}TQM Quality Dashboard - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold mb-1">TQM Quality & Maintainability Hub</h3>
+    <p class="text-muted small mb-0">
+      Academic Course: <strong>{{ course_name }}</strong> &bull;
+      Assigned Quality Goal: <strong>{{ assigned_goal }}</strong> &bull;
+      Student: <strong>{{ student_name }}</strong>
+    </p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('quality.defects') }}" class="btn btn-emerald">
+      <i class="bi bi-clipboard-plus me-1"></i>Defect Checksheet
+    </a>
+    <a href="{{ url_for('quality.pareto') }}" class="btn btn-outline-emerald">
+      <i class="bi bi-bar-chart-steps me-1"></i>Pareto Chart
+    </a>
+  </div>
+</div>
+
+<!-- Quality CTQ Summary Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon purple">
+        <i class="bi bi-bug"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ summary.total_defects }}</div>
+        <div class="stat-label">Total Logged Defects</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon amber">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <div>
+        <div class="stat-val text-warning">{{ summary.open_defects }}</div>
+        <div class="stat-label">Active Open Defects</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon emerald">
+        <i class="bi bi-check-circle"></i>
+      </div>
+      <div>
+        <div class="stat-val text-success">{{ summary.resolved_defects }}</div>
+        <div class="stat-label">Resolved / Verified</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon blue">
+        <i class="bi bi-shield-shaded"></i>
+      </div>
+      <div>
+        <div class="stat-val text-danger">{{ summary.max_rpn }}</div>
+        <div class="stat-label">Max FMEA RPN Score</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quality Nav Grid Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="card-custom h-100">
+      <div class="card-custom-header bg-light">
+        <h5 class="mb-0"><i class="bi bi-clipboard-check text-primary me-2"></i>Defect Checksheet</h5>
+      </div>
+      <div class="card-custom-body">
+        <p class="small text-muted mb-3">
+          Standardized logging and tracking of software defects through the lifecycle: 
+          <code>Reported &rarr; Investigating &rarr; Fix Implemented &rarr; Verified &rarr; Closed</code>.
+        </p>
+        <a href="{{ url_for('quality.defects') }}" class="btn btn-sm btn-outline-primary w-100">Open Defect Register &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card-custom h-100">
+      <div class="card-custom-header bg-light">
+        <h5 class="mb-0"><i class="bi bi-bar-chart-steps text-success me-2"></i>Pareto Analysis (80/20)</h5>
+      </div>
+      <div class="card-custom-body">
+        <p class="small text-muted mb-3">
+          Statistical separation of the "vital few" defect categories from the "trivial many",
+          guiding quality engineering efforts where they yield maximum impact.
+        </p>
+        <a href="{{ url_for('quality.pareto') }}" class="btn btn-sm btn-outline-success w-100">Analyze Pareto Distribution &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card-custom h-100">
+      <div class="card-custom-header bg-light">
+        <h5 class="mb-0"><i class="bi bi-shield-exclamation text-danger me-2"></i>FMEA Matrix (RPN)</h5>
+      </div>
+      <div class="card-custom-body">
+        <p class="small text-muted mb-3">
+          Failure Mode and Effects Analysis scoring each vulnerability by Severity, Occurrence, and Detection:
+          <code>RPN = S &times; O &times; D</code>.
+        </p>
+        <a href="{{ url_for('quality.fmea') }}" class="btn btn-sm btn-outline-danger w-100">Review Failure Modes &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card-custom h-100">
+      <div class="card-custom-header bg-light">
+        <h5 class="mb-0"><i class="bi bi-diagram-3 text-info me-2"></i>Ishikawa / Fishbone</h5>
+      </div>
+      <div class="card-custom-body">
+        <p class="small text-muted mb-3">
+          Cause-and-effect taxonomy investigating potential defects across People, Process, Software Code, Database, Testing, and Infrastructure.
+        </p>
+        <a href="{{ url_for('quality.fishbone') }}" class="btn btn-sm btn-outline-info w-100">Inspect Fishbone Causes &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card-custom h-100">
+      <div class="card-custom-header bg-light">
+        <h5 class="mb-0"><i class="bi bi-arrow-left-right text-dark me-2"></i>SIPOC Process Map</h5>
+      </div>
+      <div class="card-custom-body">
+        <p class="small text-muted mb-3">
+          High-level process architecture defining Suppliers, Inputs, Process Steps, Outputs, and Customers for restaurant billing operations.
+        </p>
+        <a href="{{ url_for('quality.sipoc') }}" class="btn btn-sm btn-outline-dark w-100">View SIPOC Workflow &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card-custom h-100">
+      <div class="card-custom-header bg-light">
+        <h5 class="mb-0"><i class="bi bi-arrow-repeat text-warning me-2"></i>PDCA Improvement Cycles</h5>
+      </div>
+      <div class="card-custom-body">
+        <p class="small text-muted mb-3">
+          Structured Plan-Do-Check-Act continuous improvement cycles tracking problem baselines, implemented mitigations, and verified retest results.
+        </p>
+        <a href="{{ url_for('quality.pdca') }}" class="btn btn-sm btn-outline-warning w-100">Track Continuous Improvements &rarr;</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Defect Breakdown by Module & Severity -->
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5><i class="bi bi-pie-chart me-2"></i>Defect Distribution by Severity</h5>
+      </div>
+      <div class="card-custom-body">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Severity Level</th>
+              <th>Count</th>
+              <th>Proportion</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sev in ['Critical', 'High', 'Medium', 'Low'] %}
+              {% set cnt = summary.severity_breakdown.get(sev, 0) %}
+              <tr>
+                <td>
+                  <span class="badge {% if sev == 'Critical' %}bg-danger{% elif sev == 'High' %}bg-warning text-dark{% elif sev == 'Medium' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
+                    {{ sev }}
+                  </span>
+                </td>
+                <td class="fw-bold">{{ cnt }}</td>
+                <td>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar {% if sev == 'Critical' %}bg-danger{% elif sev == 'High' %}bg-warning{% elif sev == 'Medium' %}bg-info{% else %}bg-secondary{% endif %}"
+                         style="width: {{ (cnt / summary.total_defects * 100)|round if summary.total_defects > 0 else 0 }}%;"></div>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card-custom h-100">
+      <div class="card-custom-header">
+        <h5><i class="bi bi-layers me-2"></i>Defects by Software Subsystem</h5>
+      </div>
+      <div class="card-custom-body">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Subsystem Module</th>
+              <th>Recorded Defects</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for mod, cnt in summary.module_breakdown.items() %}
+              <tr>
+                <td class="fw-semibold text-dark">{{ mod }}</td>
+                <td class="fw-bold text-success">{{ cnt }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="2" class="text-muted text-center py-3">No defects recorded yet.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
