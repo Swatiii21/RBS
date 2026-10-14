@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}404 Not Found - {{ app_title }}{% endblock %}
+{% block content %}
+<div class="card-custom text-center py-5">
+  <div class="card-custom-body">
+    <div class="display-1 text-muted fw-bold mb-3">404</div>
+    <h3 class="mb-3">Requested Page Not Found</h3>
+    <p class="text-secondary mb-4">The page or resource you requested could not be located in the restaurant billing system.</p>
+    <a href="{{ url_for('dashboard.index') }}" class="btn btn-emerald">
+      <i class="bi bi-house-door me-1"></i>Return to Dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}

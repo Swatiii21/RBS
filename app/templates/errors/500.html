@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}500 Server Error - {{ app_title }}{% endblock %}
+{% block content %}
+<div class="card-custom text-center py-5">
+  <div class="card-custom-body">
+    <div class="display-1 text-danger fw-bold mb-3">500</div>
+    <h3 class="mb-3">Internal System Exception</h3>
+    <p class="text-secondary mb-4">An unexpected processing error occurred. Diagnostic details have been logged to the technical rotation file for maintainability analysis.</p>
+    <a href="{{ url_for('dashboard.index') }}" class="btn btn-emerald">
+      <i class="bi bi-house-door me-1"></i>Return to Dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}
