@@ -330,12 +330,14 @@ def get_invoice_by_number(conn: sqlite3.Connection, invoice_number: str) -> Opti
         "Thank you for dining with us! Please visit again. TQM Certified.",
     )
     currency_symbol = get_setting(conn, "currency_symbol", "₹")
+    gst_number = get_setting(conn, "gst_number", "07AABCG1234F1Z9")
 
     return {
         "invoice": invoice,
         "items": items,
         "footer_text": footer_text,
         "currency_symbol": currency_symbol,
+        "gst_number": gst_number,
     }
 
 

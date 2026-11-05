@@ -59,6 +59,7 @@ def view_invoice(invoice_number: str) -> Any:
         items=data["items"],
         footer_text=data["footer_text"],
         currency_symbol=data["currency_symbol"],
+        gst_number=data.get("gst_number", "07AABCG1234F1Z9"),
     )
 
 

@@ -35,8 +35,13 @@
         </a>
       </li>
       <li class="nav-item">
-        <a href="{{ url_for('orders.index') }}" class="nav-link {% if request.endpoint and 'orders' in request.endpoint %}active{% endif %}">
-          <i class="bi bi-cart3"></i> Orders & POS
+        <a href="{{ url_for('orders.create') }}" class="nav-link text-warning fw-bold {% if request.endpoint and request.endpoint == 'orders.create' %}active{% endif %}">
+          <i class="bi bi-plus-circle-fill text-warning"></i> + New Bill (POS)
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{{ url_for('orders.index') }}" class="nav-link {% if request.endpoint and 'orders' in request.endpoint and request.endpoint != 'orders.create' %}active{% endif %}">
+          <i class="bi bi-cart3"></i> Orders Ledger
         </a>
       </li>
       <li class="nav-item">
@@ -117,8 +122,8 @@
         <span class="text-muted small">
           <i class="bi bi-calendar3 me-1"></i>Session: {{ academic_session }}
         </span>
-        <a href="{{ url_for('orders.create') }}" class="btn btn-sm btn-emerald">
-          <i class="bi bi-plus-circle me-1"></i>New Order
+        <a href="{{ url_for('orders.create') }}" class="btn btn-sm btn-emerald shadow-sm">
+          <i class="bi bi-receipt me-1"></i>+ New Bill (POS)
         </a>
       </div>
     </header>
